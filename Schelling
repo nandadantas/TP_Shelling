@@ -282,6 +282,6 @@ void initialize_arrays() {
   /* Aloca memória para os arrays de cores e posição */
   color=calloc(num_agents,sizeof(int));
   location=calloc(num_agents,sizeof(int));
-  
+ }  
 return 0;
 }
