@@ -156,14 +156,14 @@ void initialize_neighbor_list() {
   int l;
   for (l = 0; l < 64; l++) {
     
-    neighbor_loc[l][0] = l - 9; /* NW */
-    neighbor_loc[l][1] = l - 8; /* N  */
-    neighbor_loc[l][2] = l - 7; /* NE */
-    neighbor_loc[l][3] = l - 1; /* W  */
-    neighbor_loc[l][4] = l + 1; /* E  */
-    neighbor_loc[l][5] = l + 7; /* SW */
-    neighbor_loc[l][6] = l + 8; /* S  */
-    neighbor_loc[l][7] = l + 9; /* SE */
+    neighbor_loc[l][0] = l - 9; 
+    neighbor_loc[l][1] = l - 8; 
+    neighbor_loc[l][2] = l - 7; 
+    neighbor_loc[l][3] = l - 1; 
+    neighbor_loc[l][4] = l + 1; 
+    neighbor_loc[l][5] = l + 7; 
+    neighbor_loc[l][6] = l + 8; 
+    neighbor_loc[l][7] = l + 9; 
     
     if (l < 8) {
       neighbor_loc[l][0] = -1;
@@ -192,9 +192,9 @@ void initialize_neighbor_list() {
 } 
 void initial_output() {
   /* Imprime algumas informações no início da execução*/
-  fprintf(outfile,"Parameters:\n");
-  fprintf(outfile,"   Number of agents=%3d\n",num_agents);
-  fprintf(outfile,"   Number of agents with color 0=%3d\n",num_white);
+  fprintf(outfile,"Parametros:\n");
+  fprintf(outfile,"   Numero de agentes=%3d\n",num_agents);
+  fprintf(outfile,"   Numero de agentes de cor 0=%3d\n",num_white);
 }
 void periodic_output(int event,int moves) {
  
@@ -203,9 +203,9 @@ void periodic_output(int event,int moves) {
   int column;
   char str[3]={'.','@','#'};
   if(event==0)
-    fprintf(outfile,"Initial state of map\n");
+    fprintf(outfile,"Estado incial do mapa\n");
   else
-    fprintf(outfile,"Event %3d. Moves this period %3d\n",event,moves); 
+    fprintf(outfile,"Evento %3d. Move este período %3d\n",event,moves); 
   address=0;
   for(line=0;line<8;line++) {
     for(column=0;column<8;column++) {
@@ -234,15 +234,11 @@ void periodic_output(int event,int moves) {
 void get_parameters() {
    /* Lê vários parâmetros antes de executar */ 
   int temp=0;
-  fprintf(outfile,"Schelling's segregation model\n");
-  fprintf(outfile,"code by Benedikt Stefansson\n");
-  fprintf(outfile,"based on Pascal program by\n");
-  fprintf(outfile,"Robert Axelrod and Ted Belding\n");
   while(!temp) {
-    printf("Input number of agents (0-64): ");
+    printf("Insira o numero de agentes (0-64): ");
     scanf("%d",&temp);
     if(temp<=0 || temp>=64) {
-      printf("Number of agents must be between 0-64\n");
+      printf("Numero de agentes que deveriam estar entre 0-64\n");
       temp=0;
     } else {
       num_agents=temp;
@@ -250,10 +246,10 @@ void get_parameters() {
   }
   temp=0;
   while(!temp) {
-    printf("Number of white agents (1-%d): ",num_agents-1);
+    printf("Numero de agentes brancos (1-%d): ",num_agents-1);
     scanf("%d",&temp);
     if(temp<=0 || temp>=num_agents) {
-      printf("Number of white agents must be between 1-%d\n",num_agents);
+      printf("Numero de agentes brancos que deveriam estar entre 1-%d\n",num_agents);
       temp=0;
     } else {
       num_white=temp;
@@ -261,10 +257,10 @@ void get_parameters() {
   }
   temp=0;
   while(!temp) {
-    printf("Number of reports to print: ");
+    printf("Número de relatórios a imprimir: ");
     scanf("%d",&temp);
     if(temp<=0) {
-      printf("Number of reports must be positive\n");
+      printf("Número de relatórios positivos\n");
       temp=0;
     } else {
       number_of_reports=temp;
