@@ -1,4 +1,4 @@
-# TP_Shelling
+
 # Simulação do modelo de Schelling em C/C++ #
 
 Racismo e Segregação racial:
