@@ -1,0 +1,289 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+/* Modelo de segregação de Schelling. Código C por Benedikt Stefansson janeiro de 1998
+   baseado no código Pascal original de Tom Belding e Robert Axelrod */
+   
+/* Variáveis globais */
+int number_of_reports=8;
+int events_per_report=100;
+int num_white=25;
+int num_agents=50;
+FILE * outfile;
+/* Declara arrays */
+static int occupant[64];
+static int neighbor_loc[64][8];
+static int * color;
+static int * location;
+/* Declara subrotinas*/
+int content(int i);
+void random_move(int i);
+int get_random_location();
+void initial_output();
+void initialize_agent_color();
+void initialize_agent_location();
+void initialize_neighbor_list();
+void periodic_output(int event,int moves);
+void get_parameters();
+void initialize_arrays();
+void main(int argc,char * argv[]) {
+  int i;
+  int report;
+  int events_in_report;
+  int event=0;
+  int moves_this_period=0;
+/* Abre o arquivo de saída se solicitado */
+  if(argc>1) {
+    printf("Output will go to file %s\n",argv[1]);
+    if((outfile=fopen(argv[1],"w"))==NULL) {
+      printf("Aborting. Unable to open outfile %s\n",argv[1]);
+      exit(1);
+    }
+  } else {
+    outfile=stdout;
+  }
+  /* Get (obter) parametros */
+  get_parameters();
+  /* Alocar memória para as listas de agentes */
+  initialize_arrays();
+  /* Inicializar lattice e lista de vizinhança */
+  initial_output();
+  initialize_agent_color();
+  initialize_agent_location();
+  initialize_neighbor_list();
+  periodic_output(0,0);
+  /* Contar passos de tempo ou eventos */
+  event = 0;
+  i = 0;
+  /* Loop de evento externo */
+  for (report=0;report<number_of_reports;report++) {
+    /* Contador de movimentos */
+    moves_this_period = 0;
+    /* Loop de evento interno */
+    for (events_in_report = 0;events_in_report < events_per_report;events_in_report++) {
+      event++;
+      /* percorre a lista de agentes */
+      if (i >= num_agents)
+	i = 0;
+      if (!content(i)) {
+	/* Se o agente estiver contido, movê-lo*/
+	moves_this_period++;
+	random_move(i);
+      }
+      i++;
+    }
+    /* Imprime relatório */
+    periodic_output(event,moves_this_period);  
+  }
+  exit(0);
+}
+int content(int i) {
+  /* Calcula se o agente i é conteúdo e
+      retorna 1 se for e 0 se não */
+  int n;
+  int result;
+  int neighboor;
+  int address;
+  int neighborhood_cell;
+  int same_color_count=0;
+  int occupied_count=0;
+  address=location[i];
+  for(n=0;n<8;n++) {
+    /* Verifica se a célula vizinha está no mapa e ocupada */
+    neighborhood_cell=neighbor_loc[address][n];
+    if(neighborhood_cell!=-1 && occupant[neighborhood_cell]!=-1) {
+      /*Há alguém aqui */
+      occupied_count++;
+      /* Mas é da cor certa? */
+      if(color[occupant[neighborhood_cell]]==color[i])
+	same_color_count++;
+    }
+  }
+  /* Se mais de 1/3 dos vizinhos forem da mesma cor */
+ if(same_color_count*3 > occupied_count)
+   result=1;
+ else
+   result=0;
+ return result;
+}
+void random_move(int i) {   
+      int trial_location;
+      int look=0;
+      /* Escolhe locais aleatórios até encontrar um vazio */
+      do{
+	trial_location=get_random_location();
+      } while(occupant[trial_location]!=-1);
+      /* OK - encontra uma posição vazia e ocupa */
+      /* Antes remove da posição antiga */
+      occupant[location[i]]=-1;
+      /* Aí sim adiciona à nova posição*/
+      occupant[trial_location]=i;
+      /* E finalmente atualiza a localização do agente */
+      location[i]=trial_location;
+}
+int get_random_location() {
+  float p;
+  p=((float)rand()/(float)RAND_MAX);
+  return (int)(p*64.0);
+}
+void initialize_agent_color() {
+  /*Colore os agentes (0 ou 1)*/
+  int i;
+  for(i=0;i<num_agents;i++) {
+    if(i< num_white)
+      color[i]=0;
+    else
+      color[i]=1;
+  }
+}
+void initialize_agent_location() {
+  int i;
+  int trial_location;
+  for(i=0;i<64;i++) {
+    occupant[i]=-1;
+  }
+  for(i=0;i<num_agents;i++) {
+    do {
+      trial_location=get_random_location();
+    }while(occupant[trial_location]!=-1);
+    occupant[trial_location]=i;
+    location[i]=trial_location;
+  } 
+}
+void initialize_neighbor_list() {
+  /* Pré-calcula os vizinhos de Moore
+      para cada posição no mapa */
+  int l;
+  for (l = 0; l < 64; l++) {
+    
+    neighbor_loc[l][0] = l - 9; /* NW */
+    neighbor_loc[l][1] = l - 8; /* N  */
+    neighbor_loc[l][2] = l - 7; /* NE */
+    neighbor_loc[l][3] = l - 1; /* W  */
+    neighbor_loc[l][4] = l + 1; /* E  */
+    neighbor_loc[l][5] = l + 7; /* SW */
+    neighbor_loc[l][6] = l + 8; /* S  */
+    neighbor_loc[l][7] = l + 9; /* SE */
+    
+    if (l < 8) {
+      neighbor_loc[l][0] = -1;
+      neighbor_loc[l][1] = -1;
+      neighbor_loc[l][2] = -1;
+    }
+   
+    if (l > 55) {
+      neighbor_loc[l][5] = -1;
+      neighbor_loc[l][6] = -1;
+      neighbor_loc[l][7] = -1;
+    }
+    
+    if ((l % 7) == 0) {  
+      neighbor_loc[l][2] = -1;
+      neighbor_loc[l][4] = -1;
+      neighbor_loc[l][7] = -1;
+    }
+    
+    if ((l % 8) == 0) {
+      neighbor_loc[l][0] = -1;
+      neighbor_loc[l][3] = -1;
+      neighbor_loc[l][5] = -1;
+    }
+  }
+} 
+void initial_output() {
+  /* Imprime algumas informações no início da execução*/
+  fprintf(outfile,"Parameters:\n");
+  fprintf(outfile,"   Number of agents=%3d\n",num_agents);
+  fprintf(outfile,"   Number of agents with color 0=%3d\n",num_white);
+}
+void periodic_output(int event,int moves) {
+ 
+  int line;
+  int address;
+  int column;
+  char str[3]={'.','@','#'};
+  if(event==0)
+    fprintf(outfile,"Initial state of map\n");
+  else
+    fprintf(outfile,"Event %3d. Moves this period %3d\n",event,moves); 
+  address=0;
+  for(line=0;line<8;line++) {
+    for(column=0;column<8;column++) {
+     
+      if(occupant[address]==-1)
+	fprintf(outfile," . ");
+      else
+	fprintf(outfile,"%3d",occupant[address]);
+      address++;
+    }
+    
+    address-=8;
+    fprintf(outfile,"     ");
+    for(column=0;column<8;column++) {
+      
+      if(occupant[address]==-1)
+	fprintf(outfile," %c ",str[0]);
+      else
+	fprintf(outfile," %c ",str[color[occupant[address]]+1]);
+      address++;
+    }
+    fprintf(outfile,"\n");
+  }
+  fprintf(outfile,"\n");
+}
+void get_parameters() {
+   /* Lê vários parâmetros antes de executar */ 
+  int temp=0;
+  fprintf(outfile,"Schelling's segregation model\n");
+  fprintf(outfile,"code by Benedikt Stefansson\n");
+  fprintf(outfile,"based on Pascal program by\n");
+  fprintf(outfile,"Robert Axelrod and Ted Belding\n");
+  while(!temp) {
+    printf("Input number of agents (0-64): ");
+    scanf("%d",&temp);
+    if(temp<=0 || temp>=64) {
+      printf("Number of agents must be between 0-64\n");
+      temp=0;
+    } else {
+      num_agents=temp;
+    }
+  }
+  temp=0;
+  while(!temp) {
+    printf("Number of white agents (1-%d): ",num_agents-1);
+    scanf("%d",&temp);
+    if(temp<=0 || temp>=num_agents) {
+      printf("Number of white agents must be between 1-%d\n",num_agents);
+      temp=0;
+    } else {
+      num_white=temp;
+    }
+  }
+  temp=0;
+  while(!temp) {
+    printf("Number of reports to print: ");
+    scanf("%d",&temp);
+    if(temp<=0) {
+      printf("Number of reports must be positive\n");
+      temp=0;
+    } else {
+      number_of_reports=temp;
+    }
+  }
+  temp=0;
+  while(!temp) {
+    printf("Number of events per report: ");
+    scanf("%d",&temp);
+    if(temp<=0) {
+      printf("Number of events must be positive\n");
+      temp=0;
+    } else {
+      events_per_report=temp;
+    }
+  }
+}
+void initialize_arrays() {
+  /* Aloca memória para os arrays de cores e posição */
+  color=calloc(num_agents,sizeof(int));
+  location=calloc(num_agents,sizeof(int));
+}
