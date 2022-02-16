@@ -104,3 +104,5 @@ intolerância também aumenta. Dito isso, deve-se que o modelo também mostra co
 difícil lutar contra a segregação, não sendo apenas um fator individual. A segregação é
 um comportamento emergente, que surge a partir da interação de pessoas e dela se
 estabelece.
+
+Esse, portanto,é o modelo de segregação de Schelling. Código C/C++ baseado no código Pascal original de Tom Belding e Robert Axelrod e adaptado para o projeto da disciplina de Algorítmos e Estruturas de Dados I do curso de Sistemas de Informação da UFVJM (Universidade Federal dos Vales do Jequitinhonha e Mucuri).
